@@ -19,11 +19,11 @@ def get_bnst_info(pn_word,text):
 
     child_list=[]
     parent_list=[]
-    
+
+    # 1. 構文結果を保存 (1.親id辞書,2.単語id辞書) 
     knp = KNP()
     result = knp.parse(text)
 
-    # 1. 構文結果を保存 (1.親id辞書,2.単語id辞書) 
     for bnst in result.bnst_list():
         word = ""
         dic_value ={}
@@ -42,33 +42,48 @@ def get_bnst_info(pn_word,text):
 
         bnst_dic[bnst.bnst_id] = dic_value
         
-    # 2. 
+    # 2. 評価極性語の係り先を調査
+    # 再帰処理の追加
+    serch_id = pn_id
+    flag = True
+    while flag:
+        match = 0        
+        for key,value in bnst_dic.items():
 
-        
+            if value["parent_id"] == serch_id:                
+                child_list.append(value["word"])
+                serch_id = key
+                match += 1
+                
+        if match == 0:
+            flag = False
+                    
+
+
     # 3. 評価極性語の係り元を調査
     serch_id = pn_id
-    while True:
+    flag = True
+    while flag:
         pn_par_id = bnst_dic[serch_id]["parent_id"]
         
-        if pn_par_id == -1:
-            break
-        else:
+        if pn_par_id != -1:
             parent_list.append(bnst_dic[pn_par_id]["word"])
+        else:
+            flag = False
             
         serch_id = pn_par_id
-        
+
     print(bnst_dic)
     print(child_list)
     print(parent_list)
-    print(pn_id)
 
 
 if __name__ == '__main__' :
 
     bnst_dic = {}
     
-    text = "太郎はきれいな花子が読んでいる本を次郎に渡した"
-    pn_word = "読んで"
+    text = "太郎は花子が読んでいる本を次郎に渡した"
+    pn_word = "渡した"
     get_bnst_info(pn_word,text)
     
 
