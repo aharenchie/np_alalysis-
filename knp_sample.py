@@ -4,19 +4,17 @@ from pyknp import KNP
 
 
 """
-構文解析結果を取得
+構文解析結果を保存
 
 in：評価極性語,評価極性語のある文章
-out:親単語
+out:構文解析結果の辞書
 
 """
-def get_bnst_info(pn_word,text):        
+def save_bnst_info(pn_word,text):        
 
-    bnst_dic ={}
-    
+    bnst_dic ={}    
     pn_id = 0
-    pn_par_id = 0
-
+ 
     child_list=[]
     parent_list=[]
 
@@ -41,49 +39,110 @@ def get_bnst_info(pn_word,text):
         dic_value["word"]= word
 
         bnst_dic[bnst.bnst_id] = dic_value
-        
-    # 2. 評価極性語の係り先を調査
-    # 再帰処理の追加
-    serch_id = pn_id
-    flag = True
-    while flag:
-        match = 0        
-        for key,value in bnst_dic.items():
 
-            if value["parent_id"] == serch_id:                
+    return bnst_dic,pn_id
+
+
+"""
+評価極性語の係り元を取得
+in：評価極性語,評価極性語のある文章
+out:構文解析結果の辞書(方向は複数ある)  
+"""
+def get_bnst_child(bnst_dic,pn_id):
+    serch_ids = [pn_id]
+    flag = True
+    child_list =[]
+    match = 0
+
+    """
+    while flag:
+        match = 0
+        for key,value in bnst_dic.items():
+            if value["parent_id"] == serch_id:
                 child_list.append(value["word"])
-                serch_id = key
+                #serch_id = key
                 match += 1
                 
         if match == 0:
             flag = False
-                    
-
-
-    # 3. 評価極性語の係り元を調査
-    serch_id = pn_id
-    flag = True
+    """
     while flag:
-        pn_par_id = bnst_dic[serch_id]["parent_id"]
-        
-        if pn_par_id != -1:
-            parent_list.append(bnst_dic[pn_par_id]["word"])
-        else:
+        match = 0
+        next_ids = []
+        for serch_id in serch_ids:        
+            for key,value in bnst_dic.items():
+                if value["parent_id"] == serch_id:
+                    child_list.append([key,value["word"]])
+                    next_ids.append(key)
+                    match += 1
+                
+        if match == 0:
             flag = False
-            
-        serch_id = pn_par_id
 
-    print(bnst_dic)
+        serch_ids = next_ids
+        print(serch_ids)
+
+    """
+    for key,value in bnst_dic.items():
+        if value["parent_id"] == serch_id:
+            child_list.append([key,value["word"]])
+
     print(child_list)
-    print(parent_list)
+    for i in child_list:
+        for key,value in bnst_dic.items():
+            if value["parent_id"] == i[0]:
+                print(value,i[1])
+     """
+    
+    return child_list
+                            
+"""
+評価極性語の係り先を取得
+in：評価極性語,評価極性語のある文章
+out:構文解析結果の辞書(方向は一つ)
+"""
 
+def get_bnst_parent(bnst_dic):
 
+    bnst_dic_parent={}
+        
+    for my_id in bnst_dic.keys():
+
+        flag = True
+        parent_list=[]
+        serch_id = my_id
+        
+        while flag:
+            parent_id = bnst_dic[serch_id]["parent_id"]
+            
+            if parent_id != -1:
+                parent_list.append(bnst_dic[parent_id]["word"])
+            else:
+                flag = False
+
+            serch_id = parent_id
+
+        bnst_dic_parent[my_id]  = parent_list
+
+    return bnst_dic_parent  
+
+    
 if __name__ == '__main__' :
 
     bnst_dic = {}
+
     
-    text = "太郎は花子が読んでいる本を次郎に渡した"
-    pn_word = "渡した"
-    get_bnst_info(pn_word,text)
+    #text = "ミャハの不思議なカリスマ性が上田さん声で表現されていて素晴らしいです"
+    #pn_word = "ミャハ"
+    text="アニメ映画としては何がいいのかわからない作品でした"
+    pn_word = "いい"
     
+    bnst_dic,pn_id = save_bnst_info(pn_word,text)
+    bnst_dic_parent = get_bnst_parent(bnst_dic)
+    child_list = get_bnst_child(bnst_dic,pn_id) 
+    print("ターゲット単語: {0}".format(pn_word))
+    print("入力文章: {0}".format(text))
+    print("-----------------------")
+    print("ターゲット単語に係り先: {0}".format(bnst_dic_parent[pn_id]))
+    print("ターゲット単語に係るもの：{0}".format(child_list))
 
