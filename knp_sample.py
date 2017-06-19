@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/uAsr/bin/env python3
 # -*- coding: utf-8 -*- 
 from pyknp import KNP
 
@@ -93,6 +93,7 @@ def get_bnst_end(bnst_dic):
     return end_list
 
 """
+ターゲット単語の左側を取得する
 """    
 def get_bnst_left(bnst_dic,bnst_order_dic,pn_id):
     
@@ -113,23 +114,46 @@ def get_bnst_left(bnst_dic,bnst_order_dic,pn_id):
         
     return bnst_left
 
+"""
+ターゲット単語の右側を取得する
+"""
+def get_bnst_right(bnst_dic,bnst_order_dic,pn_id):
+
+    bnst_right = []
+
+    for right_id in bnst_order_dic[pn_id]:
+        if right_id != pn_id:
+            bnst_right.append(bnst_dic[right_id]["word"])
+
+    return bnst_right
+
+
 if __name__ == '__main__' :
 
     bnst_dic = {}
     pn_id = 0
     bnst_order_dic = {}
+    bnst_left = []
+    bnst_right = []
+    
+    text = "ミャハの不思議なカリスマ性が上田さん声で表現されていて素晴らしいです"
+    pn_word = "カリスマ"
+    #text="アニメ映画としては何がいいのかわからない作品でした"
+    #pn_word = "いい"
 
-    
-    #text = "ミャハの不思議なカリスマ性が上田さん声で表現されていて素晴らしいです"
-    #pn_word = "ミャハ"
-    text="アニメ映画としては何がいいのかわからない作品でした"
-    pn_word = "いい"
-    
+    #
     bnst_dic,pn_id = save_bnst(pn_word,text)
+
+    #
     bnst_order_dic = get_bnst_order(bnst_dic)
+
+    bnst_left = get_bnst_left(bnst_dic,bnst_order_dic,pn_id)
+
+    bnst_right = get_bnst_right(bnst_dic,bnst_order_dic,pn_id)
+    
     print("ターゲット単語: {0}".format(pn_word))
     print("入力文章: {0}".format(text))
     print("-----------------------")
-    #print("ターゲット単語の係り先: {0}".format(bnst_dic_parent[pn_id]))
-    print("ターゲット単語に係るもの(左)：{0}".format(get_bnst_left(bnst_dic,bnst_order_dic,pn_id)))
+    print("ターゲット単語に係るもの(左)：{0}".format(bnst_left))
+    print("ターゲット単語の係り先(右): {0}".format(bnst_right))
 
