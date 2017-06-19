@@ -54,21 +54,10 @@ def get_bnst_child(bnst_dic,pn_id):
     child_list =[]
     match = 0
 
-    """
-    while flag:
-        match = 0
-        for key,value in bnst_dic.items():
-            if value["parent_id"] == serch_id:
-                child_list.append(value["word"])
-                #serch_id = key
-                match += 1
-                
-        if match == 0:
-            flag = False
-    """
     while flag:
         match = 0
         next_ids = []
+        
         for serch_id in serch_ids:        
             for key,value in bnst_dic.items():
                 if value["parent_id"] == serch_id:
@@ -82,17 +71,6 @@ def get_bnst_child(bnst_dic,pn_id):
         serch_ids = next_ids
         print(serch_ids)
 
-    """
-    for key,value in bnst_dic.items():
-        if value["parent_id"] == serch_id:
-            child_list.append([key,value["word"]])
-
-    print(child_list)
-    for i in child_list:
-        for key,value in bnst_dic.items():
-            if value["parent_id"] == i[0]:
-                print(value,i[1])
-     """
     
     return child_list
                             
