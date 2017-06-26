@@ -18,17 +18,16 @@ def save_bnst(pn_word,text):
     child_list=[]
     parent_list=[]
 
-    # 1. 構文結果を保存 (1.親id辞書,2.単語id辞書) 
+    # 1. 構文結果を保存 (1.親id辞書,2.単語id辞書)
     knp = KNP()
     result = knp.parse(text)
-
+    
     for bnst in result.bnst_list():
         word = ""
         dic_value ={}
 
-        # 1-1.単語の結合、評価極性語のidの調査
+        # 1-1.単語の結合、評価極性語のidの調査    
         for mrph in bnst.mrph_list():            
-
             if mrph.midasi == pn_word: 
                 pn_id = bnst.bnst_id
                 

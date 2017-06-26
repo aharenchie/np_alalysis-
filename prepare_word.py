@@ -13,3 +13,4 @@ def choose_keyword(text, keyword_data):
                     keyword_list.append(t)
                     
     return keyword_list
+
