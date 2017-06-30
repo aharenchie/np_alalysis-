@@ -4,17 +4,18 @@
 from pyknp import KNP
 
 """
-構文解析結果を保存
+ターゲット単語と評価語の構文解析結果を保存
 
-in：評価極性語,評価極性語のある文章
+in：ターゲット単語のある文章,ターゲット単語,評価辞書(用語),評価辞書(名詞)
 out:構文解析結果の辞書
 
 """
-def save_bnst(pn_word,text):        
+def save_bnst(text,keyword,pn_dic):        
 
     bnst_dic ={}    
-    pn_id = 0
- 
+    keyword_id = 0
+    pn_id = []
+    
     child_list=[]
     parent_list=[]
 
@@ -27,19 +28,25 @@ def save_bnst(pn_word,text):
         dic_value ={}
 
         # 1-1.単語の結合、評価極性語のidの調査    
-        for mrph in bnst.mrph_list():            
-            if mrph.midasi == pn_word: 
-                pn_id = bnst.bnst_id
+        for mrph in bnst.mrph_list():
+            
+            # 1. ターゲット単語
+            if mrph.midasi == keyword: 
+                keyword_id = bnst.bnst_id
+            # 2. 評価辞書(用語・名詞)
+            elif mrph.midasi in pn_dic:
+                pn_id.append([bnst.bnst_id,pn_dic[mrph.midasi]])
                 
-            word += mrph.midasi 
+            word += mrph.midasi
 
         # 1-2.辞書追加
         dic_value["parent_id"] = bnst.parent_id
         dic_value["word"]= word
-
+        
         bnst_dic[bnst.bnst_id] = dic_value
+        
 
-    return bnst_dic,pn_id
+    return bnst_dic,keyword_id,pn_id
 
 
 """
@@ -111,7 +118,7 @@ in：構文解析結果の辞書、係り受け関係のid順、ターゲットi
 out:ターゲット単語の左側の単語
 
 """    
-def get_bnst_left(bnst_dic,bnst_order_dic,pn_id):
+def get_bnst_left(bnst_dic,bnst_order_dic,keyword_id):
     
     bnst_left = []
     end_list = get_bnst_end(bnst_dic)
@@ -121,8 +128,8 @@ def get_bnst_left(bnst_dic,bnst_order_dic,pn_id):
         serch_list = bnst_order_dic[i]
 
         # 1-2. 係り受けルートにターゲット単語があるか調べる
-        if pn_id in serch_list:
-            p = serch_list.index(pn_id)            
+        if keyword_id in serch_list:
+            p = serch_list.index(keyword_id)            
             if p != 0:
                 tmp_list = []
 
@@ -143,13 +150,13 @@ in：構文解析結果の辞書、係り受け関係のid順、ターゲットi
 out:ターゲット単語の右側の単語    
 
 """
-def get_bnst_right(bnst_dic,bnst_order_dic,pn_id):
+def get_bnst_right(bnst_dic,bnst_order_dic,keyword_id):
 
     bnst_right = []
 
     # 1. 係り関係順を元に、ターゲットの右側単語を取得
-    for right_id in bnst_order_dic[pn_id]:
-        if right_id != pn_id:
+    for right_id in bnst_order_dic[keyword_id]:
+        if right_id != keyword_id:
             bnst_right.append(bnst_dic[right_id]["word"])
 
     return bnst_right
