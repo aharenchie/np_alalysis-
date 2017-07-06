@@ -59,12 +59,20 @@ if __name__ == "__main__":
     output_dic_l = {}
     output_dic_r = {}
 
-    # 出力：レビューごとの係り受け結果
-    file_name = "./data/output/result" + str(datetime.datetime.today()) + ".csv"
-    output_f = open(file_name, 'w')
-    writer = csv.writer(output_f, lineterminator='\n')
-    writer.writerow(["id","type(t/p/n)","keyword","bnst_left","bnst_right","text"])
+    # 出力：レビューごとの係り受け結果(オリジナル)
+    file_name1 = "./data/output/result_origin" + str(datetime.datetime.today()) + ".csv"
+    output_f1 = open(file_name1, 'w')
+    writer1 = csv.writer(output_f1, lineterminator='\n')
+    writer1.writerow(["id","keyword","pn","bnst_left","bnst_right","text"])
 
+    # 出力：レビューごとの係り受け結果(係り受けに評価語あり)    
+    file_name2 = "./data/output/result_pn" + str(datetime.datetime.today()) + ".csv"
+    output_f2 = open(file_name2, 'w')
+    writer2 = csv.writer(output_f2, lineterminator='\n')
+    writer2.writerow(["id","keyword","pn_word","pn_value","bnst_left","bnst_right","text"])
+
+
+    
     # レビューデータ分析
     for i,review_data in enumerate(Reader_review_data):
 
@@ -89,36 +97,41 @@ if __name__ == "__main__":
                     bnst_order_dic = run_knp.get_bnst_order(bnst_dic)
 
                     # ターゲット単語 : 係り受け情報を取得
-                    bnst_left = run_knp.get_bnst_left(bnst_dic,bnst_order_dic,keyword_id)
-                    bnst_right = run_knp.get_bnst_right(bnst_dic,bnst_order_dic,keyword_id)
+                    bnst_lefts = run_knp.get_bnst_left(bnst_dic,bnst_order_dic,keyword_id)
+                    bnst_right = run_knp.get_bnst_right(bnst_order_dic,keyword_id)
+                    
+                    result_lefts = [[bnst_dic[i]["word"]  for i in bnst_left ] for bnst_left in bnst_lefts]
+                    result_right = [bnst_dic[i]["word"] for i in bnst_right]
 
                     # ターゲット単語 : 結果書き込み準備                    
-                    output_dic_l.setdefault(keyword, []).append(bnst_left)                    
-                    output_dic_r.setdefault(keyword, []).append(bnst_right)
+                    output_dic_l.setdefault(keyword, []).append(result_lefts)                    
+                    output_dic_r.setdefault(keyword, []).append(result_right)
                     
-                    # レビューごとの結果書き込み
-                    writer.writerow([i+1,"t",keyword,bnst_left,bnst_right,text])
-
                     
-                    # 極性語 : 係り受け情報を取得
+                    # ターゲット係り受けの評価情報出力
+                    pn_sum = 0
                     if len(pn_list) != 0:
                         for pn_ids in pn_list:
                             
                             pn_id = pn_ids[0]
-                            
-                            if pn_ids[1] == 1:
-                                pn_value = "p"
-                            elif pn_ids[1] == -1:
-                                pn_value = "n"
-                            
-                            pn_bnst_left = run_knp.get_bnst_left(bnst_dic,bnst_order_dic,pn_id)
-                            pn_bnst_right = run_knp.get_bnst_right(bnst_dic,bnst_order_dic,pn_id)
+                            pn_value = pn_ids[1]
 
-                            # レビューごとの結果書き込み
+                            pn_sum += pn_value
                             
-                            writer.writerow([i+1,pn_value,bnst_dic[pn_id]["word"],pn_bnst_left,pn_bnst_right,text])
+                            # 左側に評価語あり
+                            for bnst_left in bnst_lefts:
+                                if pn_id in bnst_left:
+                                    # レビューごとの結果書き込み
+                                    writer2.writerow([i+1,keyword,"左："+bnst_dic[pn_id]["word"],pn_value,result_lefts,result_right,text])
                                     
-                    
+                            # 右側に評価語あり
+                            if pn_id in bnst_right:                                                                
+                                # レビューごとの結果書き込み                            
+                                writer2.writerow([i+1,keyword,"右:"+bnst_dic[pn_id]["word"],pn_value,result_lefts,result_right,text])
+                                
+                    # レビューごとの結果書き込み(+評価あり)
+                    writer1.writerow([i+1,keyword,pn_sum,result_lefts,result_right,text])
+
             
     # ターゲット単語ごとの結果書き込み
     io_word.write_csv(output_dic_l,"./data/output/target_l")
@@ -126,6 +139,7 @@ if __name__ == "__main__":
 
 
     input_f.close()
-    output_f.close()
+    output_f1.close()
+    output_f2.close()
 
-    
+   

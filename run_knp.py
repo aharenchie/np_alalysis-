@@ -112,12 +112,12 @@ def get_bnst_end(bnst_dic):
     return end_list
 
 """
-ターゲット単語の左側を取得する
+ターゲット単語の左側のidを取得する
 
 in：構文解析結果の辞書、係り受け関係のid順、ターゲットid
-out:ターゲット単語の左側の単語
+out:ターゲット単語の左側のid (複数あり)
 
-"""    
+"""
 def get_bnst_left(bnst_dic,bnst_order_dic,keyword_id):
     
     bnst_left = []
@@ -132,31 +132,36 @@ def get_bnst_left(bnst_dic,bnst_order_dic,keyword_id):
             p = serch_list.index(keyword_id)            
             if p != 0:
                 tmp_list = []
-
+                
                 # 1-3. ターゲット単語の左側の単語を取得
                 for j in range(p):
                     left_id = serch_list[j]
-                    tmp_list.append(bnst_dic[left_id]["word"])
+                    tmp_list.append(left_id)
 
                 #1-4. 取得したものをリストに格納
                 bnst_left.append(tmp_list)
         
     return bnst_left
 
-"""
-ターゲット単語の右側を取得する
 
-in：構文解析結果の辞書、係り受け関係のid順、ターゲットid
-out:ターゲット単語の右側の単語    
 
 """
-def get_bnst_right(bnst_dic,bnst_order_dic,keyword_id):
+ターゲット単語の右側のidを取得する
+
+in：係り受け関係のid順、ターゲットid
+out:ターゲット単語の右側のid (1つのみ)
+"""
+
+def get_bnst_right(bnst_order_dic,keyword_id):
 
     bnst_right = []
-
     # 1. 係り関係順を元に、ターゲットの右側単語を取得
     for right_id in bnst_order_dic[keyword_id]:
         if right_id != keyword_id:
-            bnst_right.append(bnst_dic[right_id]["word"])
+            bnst_right.append(right_id)
 
     return bnst_right
+
+
+    
+    
