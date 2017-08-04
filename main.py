@@ -76,19 +76,21 @@ if __name__ == "__main__":
     # レビューデータ分析
     for i,review_data in enumerate(Reader_review_data):
 
-        print(i+1)
-
-        review_text=re.split('[,。]',review_data[3])
+        print(i+1)        
+        review_text=re.split(',',review_data[3])
         
         for text in review_text:
             # レビュー文にターゲット単語があるか調べる
             keyword_list = prepare_word.choose_keyword(text,keyword_data) 
 
-            text = text.replace(" ","　")
+            # 記号変換-バグ対策
+            symbols = [' ','"']
+            for symbol in symbols:
+                if symbol in text:
+                    text = text.translate(str.maketrans(symbol,"　"))
 
             # レビュー文にターゲット単語があった場合
             if text != "" and len(keyword_list) != 0:
-
                 #　ターゲット単語・極性語の係り受けid
                 for keyword in keyword_list:
                     bnst_dic,keyword_id,pn_list = run_knp.save_bnst(text,keyword,pn_dic)                
